@@ -1,0 +1,114 @@
+{
+  "name": "hood-alerts",
+  "version": "0.1.0",
+  "description": "Telegram + Discord alert bots for Robinhood Chain memecoins (chain ID 4663): normalized launch/curve/graduation/whale events, a schema-validated rule engine, rate-limit-correct notifiers, and a restart-safe hosted service with SQLite state.",
+  "keywords": [
+    "robinhood",
+    "robinhood-chain",
+    "memecoin",
+    "alerts",
+    "telegram-bot",
+    "discord-bot",
+    "noxa",
+    "odyssey",
+    "whale-alerts",
+    "uniswap",
+    "viem"
+  ],
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "nirholas (https://x.com/nichxbt)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nirholas/robinhood-chain-alerts.git"
+  },
+  "homepage": "https://nirholas.github.io/hood-alerts/",
+  "bugs": {
+    "url": "https://github.com/nirholas/robinhood-chain-alerts/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "hood-alerts": "./dist/service/main.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./events": {
+      "types": "./dist/events/index.d.ts",
+      "import": "./dist/events/index.js",
+      "require": "./dist/events/index.cjs"
+    },
+    "./rules": {
+      "types": "./dist/rules/index.d.ts",
+      "import": "./dist/rules/index.js",
+      "require": "./dist/rules/index.cjs"
+    },
+    "./notifiers": {
+      "types": "./dist/notifiers/index.d.ts",
+      "import": "./dist/notifiers/index.js",
+      "require": "./dist/notifiers/index.cjs"
+    },
+    "./bot": {
+      "types": "./dist/bot/index.d.ts",
+      "import": "./dist/bot/index.js",
+      "require": "./dist/bot/index.cjs"
+    },
+    "./tiers": {
+      "types": "./dist/tiers/index.d.ts",
+      "import": "./dist/tiers/index.js",
+      "require": "./dist/tiers/index.cjs"
+    },
+    "./service": {
+      "types": "./dist/service/index.d.ts",
+      "import": "./dist/service/index.js",
+      "require": "./dist/service/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run tests",
+    "test:watch": "vitest",
+    "start": "node dist/service/main.js",
+    "dev": "tsx src/service/main.ts",
+    "verify:chain": "tsx examples/verify-chain.ts",
+    "demo:events": "tsx examples/watch-events.ts",
+    "demo:notify": "tsx examples/dry-run-notify.ts",
+    "demo:reputation": "tsx examples/deployer-reputation.ts",
+    "register:discord": "tsx examples/register-discord-commands.ts",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "dependencies": {
+    "zod": "^4.0.0"
+  },
+  "peerDependencies": {
+    "hoodchain": "^0.1.1",
+    "hoodkit": "^0.1.0",
+    "viem": "^2.55.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "hoodchain": "^0.1.1",
+    "hoodkit": "^0.1.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.0",
+    "viem": "^2.55.0",
+    "vitest": "^3.2.0"
+  }
+}

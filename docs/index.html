@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hood-alerts: Telegram and Discord alerts for Robinhood Chain memecoins</title>
+<meta name="description" content="Launch, curve, graduation and whale-trade alerts for Robinhood Chain (chain 4663) memecoins. Schema-validated rules, correct Telegram and Discord escaping and rate limiting, and a hosted service that survives a restart mid-stream.">
+<link rel="stylesheet" href="./site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9A%A8%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<nav class="top" aria-label="Site">
+  <div class="wrap">
+    <a class="brand" href="./index.html">hood<span class="tick">-alerts</span></a>
+    <div class="links">
+      <a href="#taxonomy">Taxonomy</a>
+      <a href="#lifecycles" class="hide-sm">Launchpads</a>
+      <a href="#restart">Restart safety</a>
+      <a href="#tiers" class="hide-sm">Tiers</a>
+      <a href="https://github.com/nirholas/robinhood-chain-alerts">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero wrap">
+  <h1>Memecoin alerts for<br><span class="grad">Robinhood Chain</span></h1>
+  <p class="lede">
+    New launches, bonding-curve trades, graduations and whale swaps on chain 4663, delivered to
+    Telegram and Discord. Rules are schema-validated data a subscriber edits from chat. USD values
+    come from live on-chain liquidity, never a hardcoded price. And the service survives a restart
+    mid-stream without double-sending or silently skipping a block.
+  </p>
+  <div class="cta">
+    <span class="install"><span class="dollar">$</span> npm install hood-alerts hoodchain hoodkit viem</span>
+    <a class="btn primary" href="#taxonomy">See the taxonomy</a>
+    <a class="btn" href="https://github.com/nirholas/robinhood-chain-alerts#readme">Read the docs</a>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section class="block" id="pipeline">
+  <h2>Chain to inbox</h2>
+  <p class="sub">
+    Four stages, each independently testable. Splitting ingestion from delivery is what lets the free
+    tier have a real delivery delay, lets a Telegram outage stall delivery without stalling ingestion,
+    and keeps a slow platform from pushing the block cursor behind the chain.
+  </p>
+  <div class="pipeline" role="img" aria-label="Pipeline: confirmed blocks are decoded into normalized events, matched against per-subscription rules, queued in a durable outbox, then delivered to Telegram and Discord.">
+    <div class="stage">
+      <span class="pip"></span>
+      <div class="icon" aria-hidden="true">⛓️</div>
+      <h3>Confirmed blocks</h3>
+      <p>Both launchpads plus tracked Uniswap v3 pools, read through a persisted per-source cursor.</p>
+    </div>
+    <div class="stage">
+      <span class="pip"></span>
+      <div class="icon" aria-hidden="true">🧩</div>
+      <h3>Normalized events</h3>
+      <p>launch, curve_trade, graduation, whale_trade, each with a USD value or an honest null.</p>
+    </div>
+    <div class="stage">
+      <span class="pip"></span>
+      <div class="icon" aria-hidden="true">⚖️</div>
+      <h3>Rule engine</h3>
+      <p>Cheap filters first, on-chain lookups only when a rule actually asks for one.</p>
+    </div>
+    <div class="stage">
+      <span class="pip"></span>
+      <div class="icon" aria-hidden="true">📮</div>
+      <h3>Outbox and delivery</h3>
+      <p>Deduped, tier-delayed, retried with backoff, dead-lettered when a target is gone for good.</p>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="lifecycles">
+  <h2>Two launchpads, two lifecycles</h2>
+  <p class="sub">
+    This is the detail an alert product has to get right. NOXA and The Odyssey are not the same
+    machine, and pretending they are produces alerts that are false rather than merely noisy.
+  </p>
+  <div class="pads">
+    <div class="pad">
+      <h3>NOXA</h3>
+      <div class="host">fun.noxa.fi/robinhood · instant launcher</div>
+      <ul>
+        <li>One transaction deploys the ERC-20, creates a Uniswap v3 pool, seeds single-sided liquidity and locks the LP NFT.</li>
+        <li>No bonding curve exists, so there is nothing to fill.</li>
+        <li>Trades as ordinary Uniswap v3 swaps from block one.</li>
+        <li><strong>A NOXA graduation is not a thing.</strong> Any product that offers one is describing an event that never fires.</li>
+      </ul>
+      <div class="kinds">
+        <span class="kind on launch">launch</span>
+        <span class="kind off">curve_trade</span>
+        <span class="kind off">graduation</span>
+        <span class="kind on whale">whale_trade</span>
+      </div>
+    </div>
+    <div class="pad">
+      <h3>The Odyssey</h3>
+      <div class="host">theodyssey.fun · bonding curve, virtual reserves</div>
+      <ul>
+        <li>A launch opens a curve. No pool exists yet, so the launch has no dollar value attached.</li>
+        <li>Every buy and sell on the curve emits <code>Traded</code>, priced through its native-ETH leg.</li>
+        <li>When the curve fills, <code>PoolCompleted</code> and <code>PoolMigrated</code> move liquidity to a locked Uniswap v3 pool.</li>
+        <li>After graduating, its tokens produce whale trades like any other pool.</li>
+      </ul>
+      <div class="kinds">
+        <span class="kind on launch">launch</span>
+        <span class="kind on curve">curve_trade</span>
+        <span class="kind on grad">graduation</span>
+        <span class="kind on whale">whale_trade</span>
+      </div>
+    </div>
+  </div>
+  <div class="callout">
+    <strong>The asymmetry is enforced, not documented.</strong> A rule asking for NOXA graduations is
+    rejected by the schema at validation time, with an explanation, instead of being accepted and
+    quietly never firing:
+    <pre><code>safeParseRule({ id: 'nope', kinds: ['graduation'], launchpads: ['noxa'] })
+// success: false
+// "this combination can never fire: NOXA is an instant launcher with no
+//  bonding curve, so it emits no curve_trade and no graduation"</code></pre>
+  </div>
+</section>
+
+<section class="block" id="taxonomy">
+  <h2>The event taxonomy</h2>
+  <p class="sub">
+    Every event carries a stable id derived from its transaction hash and log index, which is what
+    makes replaying a block range after a crash safe.
+  </p>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Kind</th><th>Decoded from</th><th>Launchpads</th><th>usdValue is</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>launch</code></td>
+          <td>NOXA <code>TokenLaunched</code>, Odyssey <code>TokenCreated</code></td>
+          <td>both</td>
+          <td>the deployer's initial buy (NOXA), or <code>null</code> on Odyssey, where the curve holds the liquidity</td>
+        </tr>
+        <tr>
+          <td><code>curve_trade</code></td>
+          <td>Odyssey <code>Traded</code></td>
+          <td class="dim">Odyssey only</td>
+          <td>the native-ETH leg, priced through live WETH/USDG liquidity</td>
+        </tr>
+        <tr>
+          <td><code>graduation</code></td>
+          <td>Odyssey <code>PoolMigrated</code></td>
+          <td class="dim">Odyssey only</td>
+          <td>the quote side used to seed the migrated pool</td>
+        </tr>
+        <tr>
+          <td><code>whale_trade</code></td>
+          <td>Uniswap v3 <code>Swap</code> on a tracked memecoin pool</td>
+          <td>both</td>
+          <td>the swap's quote leg</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="block" id="evidence">
+  <h2>Every source, decoded against mainnet</h2>
+  <p class="sub">
+    <code>npm run verify:chain</code> runs the whole read path against the public RPC with no
+    credentials, no database and no writes. Replaying the launchpads' first 1.44 million blocks:
+  </p>
+<pre><code>chain 4663, head block 15010850
+ETH/USD from live Uniswap v3 liquidity: $1905.26
+
+scanning blocks 61688 to 1500000 (1438313 blocks)
+
+NOXA launches        2621 events
+  launch       ? 0x6399E2Bd8af62C0ac13f55613C3469b67332a6Fd $266.74 block 61869
+  launch       HUSK 0x57EB9C9153cfE0277F91Ff8B8604C2D3006a9196 $9.53 block 61987
+Odyssey launches        4 events
+  launch       ROBIN 0xfB4729659eeF22Bfc1c2B680F6F873f8147aaaab unpriced block 983265
+Odyssey curve trades  110 events
+  curve_trade  ROBIN 0xfB4729659eeF22Bfc1c2B680F6F873f8147aaaab $18.67 block 983265
+Odyssey graduations     1 events
+  graduation   ROBIN 0xfB4729659eeF22Bfc1c2B680F6F873f8147aaaab $7618.47 block 1048638
+Whale trades         4045 events
+  whale_trade  CHEEMS 0xdaA213A0Bd8B048D6022e2c46df877E8A204072b $190.46 block 1439024
+
+pools discovered and registered for whale watching: 2622</code></pre>
+  <p class="sub">
+    Follow ROBIN down those four rows and the taxonomy proves itself: a curve opens (unpriced,
+    because a curve holds no pool), trades on the curve, then fills and migrates with $7,618.47 of
+    liquidity seeded. NOXA tokens never appear in the middle two rows, because they cannot. The
+    first NOXA token has no <code>symbol()</code> and renders as <code>?</code> rather than
+    dropping the alert.
+  </p>
+  <div class="callout">
+    <strong>No hardcoded prices.</strong> USDG legs are dollars by definition (the chain's fully
+    reserved stablecoin, 6 decimals). ETH legs are priced by asking the chain's own Uniswap v3
+    liquidity what 1 WETH sells into USDG for. Anything else reports <code>null</code>, and a
+    <code>minUsd</code> rule does not match it. Unknown is never quietly treated as zero.
+  </div>
+</section>
+
+<section class="block" id="restart">
+  <h2>Surviving a restart mid-stream</h2>
+  <p class="sub">
+    An alert bot that double-sends is spam, and one that skips a range misses the launch its
+    subscribers paid for. Three guarantees, each held by a specific mechanism and each covered by a
+    test that simulates the failure.
+  </p>
+  <div class="grid">
+    <div class="card">
+      <h3>Never double-send</h3>
+      <p>Every delivery has a deterministic key, <code>eventId|subscriptionId|ruleId</code>, and the event id comes from the transaction hash and log index. Re-processing a range regenerates identical keys, so the second pass inserts nothing.</p>
+    </div>
+    <div class="card">
+      <h3>Never silently skip</h3>
+      <p>The block cursor advances only after every event in a chunk is enqueued and committed. A crash mid-chunk, or a failed RPC call, leaves it pointing at the start of that range, so the range is re-read.</p>
+    </div>
+    <div class="card">
+      <h3>Never lose a queued alert</h3>
+      <p>Queued rows live in an outbox until delivered or dead-lettered. On startup, rows abandoned in <code>sending</code> by a crash return to <code>pending</code> and are retried.</p>
+    </div>
+  </div>
+  <div class="callout">
+    <strong>The honest caveat.</strong> If the process dies after a platform accepted a message but
+    before the row was marked sent, that alert goes out twice. Neither the Telegram nor the Discord
+    send API takes a client-supplied idempotency key, so the window cannot be closed from here.
+    Everything outside it is exactly once.
+  </div>
+</section>
+
+<section class="block" id="delivery">
+  <h2>Delivery that respects each platform's actual contract</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th></th><th>Telegram</th><th>Discord</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Rate limit signal</td>
+          <td><code>parameters.retry_after</code>, whole seconds, on a 429</td>
+          <td>Per-route bucket headers on every response, plus <code>retry_after</code> as a float</td>
+        </tr>
+        <tr>
+          <td>Correct behaviour</td>
+          <td>Wait exactly that long, capped so one throttled chat cannot stall the loop</td>
+          <td>Do not send once a bucket is exhausted; apply a global 429 to every route</td>
+        </tr>
+        <tr>
+          <td>Escaping</td>
+          <td>18 reserved characters in MarkdownV2 text, 2 in a link URL, 2 in a code span, 3 in HTML</td>
+          <td>Markdown rendered inside embed titles, descriptions and field values</td>
+        </tr>
+        <tr>
+          <td>Permanent failures</td>
+          <td class="no">Blocked bot, deleted chat: dead-lettered, never retried</td>
+          <td class="no">Unknown webhook, missing permission: dead-lettered</td>
+        </tr>
+        <tr>
+          <td>Command transport</td>
+          <td class="yes">Long polling: no public URL, TLS or firewall rule needed</td>
+          <td class="yes">Slash commands over an Ed25519-verified interactions endpoint</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout">
+    Memecoin names are adversarial input. A token called <code>WHO_LET_THE</code> italicises half a
+    MarkdownV2 message and a token called <code>&lt;b&gt;RUG</code> injects markup under HTML parse
+    mode; either way Telegram answers <code>400 can't parse entities</code> and the alert is lost.
+    Each context has its own escaper and its own tests, and truncation is surrogate-pair aware so a
+    long emoji-bearing name is cut cleanly.
+  </div>
+</section>
+
+<section class="block" id="tiers">
+  <h2>Tiers are enforced, not advertised</h2>
+  <p class="sub">
+    Every limit maps to a real cost, and the check lives in exactly one place. The bot asks it before
+    accepting a rule; the dispatcher asks it before queuing a delivery. Nothing else reads the policy
+    table, so the two cannot disagree about who is premium.
+  </p>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Limit</th><th>Free</th><th>Premium</th></tr></thead>
+      <tbody>
+        <tr><td>Subscriptions</td><td>1</td><td>10</td></tr>
+        <tr><td>Rules per subscription</td><td>3</td><td>50</td></tr>
+        <tr><td>Filters per rule</td><td>3</td><td>24</td></tr>
+        <tr><td>Watchlist size</td><td>5</td><td>500</td></tr>
+        <tr><td>Alerts per hour</td><td>30</td><td>2,000</td></tr>
+        <tr><td>Delivery delay</td><td>60s</td><td class="yes">none</td></tr>
+        <tr><td>Liquidity and reputation filters</td><td class="no">no</td><td class="yes">yes</td></tr>
+        <tr><td>Event kinds</td><td>launch, graduation, whale_trade</td><td class="yes">all four, including the curve firehose</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout">
+    <strong>Entitlements, honestly.</strong> Two providers ship and both work. The default grants
+    premium from configuration, which is what a self-hoster wants. The other reads USDG
+    <code>Transfer</code> logs from a signature-linked wallet to the operator's receiving address and
+    accrues subscription time from those real payments: no facilitator, no card processor, no third
+    party. hood-alerts deliberately does <em>not</em> wire an x402 rail, because x402 prices a single
+    HTTP request and a subscription is not a request.
+  </div>
+</section>
+
+<section class="block" id="limits">
+  <h2>What it does not do</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Watch every pool on the chain</h3>
+      <p>A topic-only Uniswap v3 <code>Swap</code> query overflows the public RPC's 10,000-log result cap in under 2,000 blocks. Whale trades cover a tracked pool set built from launchpad activity, with subscriber watchlists pinned on top of the cap.</p>
+    </div>
+    <div class="card">
+      <h3>Run on testnet</h3>
+      <p>Neither launchpad is deployed on chain 46630. Building sources against it throws rather than reporting an empty chain as "no launches".</p>
+    </div>
+    <div class="card">
+      <h3>Call a rug a rug</h3>
+      <p>The drained-pool figure is a defined heuristic: a prior launch whose quote reserve is now below a threshold. A token that never traded looks the same. It is evidence, not a verdict.</p>
+    </div>
+    <div class="card">
+      <h3>Measure tradeable depth</h3>
+      <p>Liquidity filters read total pool reserves. For concentrated positions the reserve inside the active tick can be far smaller.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>hood-alerts · Robinhood Chain 4663 · built on hoodchain and hoodkit</span>
+    <span><a href="https://github.com/nirholas/robinhood-chain-alerts">GitHub</a> · <a href="https://x.com/nichxbt">@nichxbt</a></span>
+  </div>
+</footer>
+
+</body>
+</html>

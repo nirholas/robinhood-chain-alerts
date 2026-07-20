@@ -1,6 +1,6 @@
 {
   "name": "hood-alerts",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Telegram + Discord alert bots for Robinhood Chain memecoins (chain ID 4663): normalized launch/curve/graduation/whale events, a schema-validated rule engine, rate-limit-correct notifiers, and a restart-safe hosted service with SQLite state.",
   "keywords": [
     "robinhood",
@@ -21,7 +21,7 @@
     "type": "git",
     "url": "git+https://github.com/nirholas/robinhood-chain-alerts.git"
   },
-  "homepage": "https://nirholas.github.io/hood-alerts/",
+  "homepage": "https://nirholas.github.io/robinhood-chain-alerts/",
   "bugs": {
     "url": "https://github.com/nirholas/robinhood-chain-alerts/issues"
   },

@@ -367,3 +367,7 @@ npm run verify:chain   # against the real RPC, no credentials
 ## License
 
 Proprietary, all rights reserved. See [LICENSE](./LICENSE).
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=nirholas/robinhood-chain-alerts&type=Date)](https://www.star-history.com/#nirholas/robinhood-chain-alerts&Date)

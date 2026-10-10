@@ -1,0 +1,28 @@
+# robinhood-chain-alerts
+
+> Telegram + Discord alert bots for Robinhood Chain memecoins: new launches, graduations, whale trades. Hosted service, free + premium tier.
+
+robinhood-chain-alerts is an open-source repository by nirholas, part of the three.ws ecosystem.
+
+## Docs
+
+- [README](https://github.com/nirholas/robinhood-chain-alerts/blob/HEAD/README.md): install, usage and reference
+- [The thing most memecoin alert bots get wrong](https://github.com/nirholas/robinhood-chain-alerts/blob/HEAD/README.md#the-thing-most-memecoin-alert-bots-get-wrong)
+- [Event taxonomy](https://github.com/nirholas/robinhood-chain-alerts/blob/HEAD/README.md#event-taxonomy)
+- [Install](https://github.com/nirholas/robinhood-chain-alerts/blob/HEAD/README.md#install)
+- [Quickstart: the event pipeline](https://github.com/nirholas/robinhood-chain-alerts/blob/HEAD/README.md#quickstart-the-event-pipeline)
+- [Quickstart: rules and delivery](https://github.com/nirholas/robinhood-chain-alerts/blob/HEAD/README.md#quickstart-rules-and-delivery)
+- [Rules are data](https://github.com/nirholas/robinhood-chain-alerts/blob/HEAD/README.md#rules-are-data)
+- [Escaping, because that is how alert bots die](https://github.com/nirholas/robinhood-chain-alerts/blob/HEAD/README.md#escaping-because-that-is-how-alert-bots-die)
+- [Rate limiting, per each platform's actual contract](https://github.com/nirholas/robinhood-chain-alerts/blob/HEAD/README.md#rate-limiting-per-each-platforms-actual-contract)
+- [AGENTS.md](https://github.com/nirholas/robinhood-chain-alerts/blob/HEAD/AGENTS.md): guidance for coding agents
+- [Full text for LLMs](https://github.com/nirholas/robinhood-chain-alerts/blob/HEAD/llms-full.txt): the README inlined
+
+## Project
+
+- [Source](https://github.com/nirholas/robinhood-chain-alerts)
+- [Issues](https://github.com/nirholas/robinhood-chain-alerts/issues)
+- [Discussions](https://github.com/nirholas/robinhood-chain-alerts/discussions)
+- [Homepage](https://nirholas.github.io/robinhood-chain-alerts/)
+- [three.ws](https://three.ws): the platform this is part of
+- [All repositories by nirholas](https://github.com/nirholas/nirholas#readme)

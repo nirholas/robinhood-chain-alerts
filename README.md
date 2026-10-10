@@ -1,5 +1,10 @@
 # hood-alerts
 
+<!-- three.ws:badges -->
+[![GitHub stars](https://img.shields.io/github/stars/nirholas/robinhood-chain-alerts?style=flat&logo=github)](https://github.com/nirholas/robinhood-chain-alerts/stargazers) [![Last commit](https://img.shields.io/github/last-commit/nirholas/robinhood-chain-alerts?style=flat)](https://github.com/nirholas/robinhood-chain-alerts/commits) [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat)](https://github.com/nirholas/robinhood-chain-alerts/pulls) [![AI agent friendly](https://img.shields.io/badge/AI%20agents-AGENTS.md%20%2B%20llms.txt-6d5dfc?style=flat)](https://github.com/nirholas/robinhood-chain-alerts/blob/HEAD/AGENTS.md)
+<!-- /three.ws:badges -->
+
+
 **Telegram and Discord alert bots for [Robinhood Chain](https://docs.robinhood.com/chain/) memecoins (chain ID 4663): new launches, graduations, whale trades. Hosted service, free and premium tier.**
 
 Chain watching is not this package's job. [`hoodchain`](https://github.com/nirholas/robinhood-chain-sdk) already has the launchpad watchers, the sequencer firehose and the Uniswap v3 quote path, and [`hoodkit`](https://github.com/nirholas/robinhood-chain-kit) has the swap decoding. hood-alerts is everything above them, which is where an alert product actually lives:
@@ -371,3 +376,26 @@ Proprietary, all rights reserved. See [LICENSE](./LICENSE).
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=nirholas/robinhood-chain-alerts&type=Date)](https://www.star-history.com/#nirholas/robinhood-chain-alerts&Date)
+
+<!-- three.ws:growth -->
+## Support the project
+
+If robinhood-chain-alerts saves you time, **[star it on GitHub](https://github.com/nirholas/robinhood-chain-alerts)**. Stars are how other developers and AI agents find the repositories worth trusting, and they cost you one click.
+
+Know someone who would use it? [Post on X](https://twitter.com/intent/tweet?text=robinhood-chain-alerts%3A%20Telegram%20%2B%20Discord%20alert%20bots%20for%20Robinhood%20Chain%20memecoins%3A%20new%20launches%2C%20graduations%2C%20whale%20trades&url=https%3A%2F%2Fgithub.com%2Fnirholas%2Frobinhood-chain-alerts) · [Share on Bluesky](https://bsky.app/intent/compose?text=robinhood-chain-alerts%3A%20Telegram%20%2B%20Discord%20alert%20bots%20for%20Robinhood%20Chain%20memecoins%3A%20new%20launches%2C%20graduations%2C%20whale%20trades%20https%3A%2F%2Fgithub.com%2Fnirholas%2Frobinhood-chain-alerts) · [Share on LinkedIn](https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fgithub.com%2Fnirholas%2Frobinhood-chain-alerts) · [Submit to Hacker News](https://news.ycombinator.com/submitlink?u=https%3A%2F%2Fgithub.com%2Fnirholas%2Frobinhood-chain-alerts&t=robinhood-chain-alerts%3A%20Telegram%20%2B%20Discord%20alert%20bots%20for%20Robinhood%20Chain%20memecoins%3A%20new%20launches%2C%20graduations%2C%20whale%20trades) · [Share on Reddit](https://www.reddit.com/submit?url=https%3A%2F%2Fgithub.com%2Fnirholas%2Frobinhood-chain-alerts&title=robinhood-chain-alerts%3A%20Telegram%20%2B%20Discord%20alert%20bots%20for%20Robinhood%20Chain%20memecoins%3A%20new%20launches%2C%20graduations%2C%20whale%20trades)
+
+## Built for AI agents too
+
+Coding agents and LLM tooling can read this repo directly: [AGENTS.md](./AGENTS.md), [llms.txt](./llms.txt), [llms-full.txt](./llms-full.txt). Point an agent at `https://github.com/nirholas/robinhood-chain-alerts` and it has the context it needs.
+
+## More from the same author
+
+- [All repositories by nirholas](https://github.com/nirholas/nirholas#readme): the full catalog, grouped by topic
+- [three.ws](https://three.ws): the platform for 3D AI agents with Solana wallets, a skill marketplace and x402 payments
+- Questions or ideas: [open an issue](https://github.com/nirholas/robinhood-chain-alerts/issues) or [start a discussion](https://github.com/nirholas/robinhood-chain-alerts/discussions)
+
+## Contributors
+
+[![Contributors](https://contrib.rocks/image?repo=nirholas/robinhood-chain-alerts)](https://github.com/nirholas/robinhood-chain-alerts/graphs/contributors)
+
+<!-- /three.ws:growth -->

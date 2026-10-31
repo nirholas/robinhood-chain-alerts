@@ -94,7 +94,7 @@
     "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
-    "zod": "^4.0.0"
+    "zod": "^4.6.7"
   },
   "peerDependencies": {
     "hoodchain": "^0.1.1",
@@ -105,10 +105,10 @@
     "@types/node": "^24.0.0",
     "hoodchain": "^0.1.1",
     "hoodkit": "^0.1.0",
-    "tsup": "^8.5.0",
+    "tsup": "^9.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.9.0",
     "viem": "^2.55.0",
-    "vitest": "^3.2.0"
+    "vitest": "^5.0.5"
   }
 }
